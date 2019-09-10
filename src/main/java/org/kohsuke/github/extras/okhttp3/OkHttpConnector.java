@@ -1,24 +1,17 @@
-package org.kohsuke.github.extras;
+package org.kohsuke.github.extras.okhttp3;
 
-import com.squareup.okhttp.ConnectionSpec;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.OkUrlFactory;
+import okhttp3.ConnectionSpec;
+import okhttp3.OkHttpClient;
 
 import org.kohsuke.github.HttpConnector;
 
 import java.io.IOException;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
 import java.util.Arrays;
 import java.util.List;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * {@link HttpConnector} for {@link OkHttpClient}.
@@ -28,21 +21,25 @@ import javax.net.ssl.SSLSocketFactory;
  * response does not count against the rate limit.
  * See http://developer.github.com/v3/#conditional-requests
  *
- * @author Roberto Tyley
+ * @author Liam Newman
  * @author Kohsuke Kawaguchi
  */
 public class OkHttpConnector implements HttpConnector {
-    private final OkUrlFactory urlFactory;
+    private final OkHttpClient client;
+    private final ObsoleteUrlFactory urlFactory;
 
-    public OkHttpConnector(OkUrlFactory urlFactory) {
-        urlFactory.client().setSslSocketFactory(TlsSocketFactory());
-        urlFactory.client().setConnectionSpecs(TlsConnectionSpecs());
-        this.urlFactory = urlFactory;
+    public OkHttpConnector(OkHttpClient client) {
+
+        OkHttpClient.Builder builder = client.newBuilder();
+
+        builder.connectionSpecs(TlsConnectionSpecs());
+        this.client = builder.build();
+        this.urlFactory = new ObsoleteUrlFactory(this.client);
     }
 
     public HttpURLConnection connect(URL url) throws IOException {
         HttpURLConnection urlConnection = urlFactory.open(url);
-        if (urlFactory.client().getCache() != null) {
+        if (client.cache() != null) {
             // By default OkHttp honors max-age, meaning it will use local cache
             // without checking the network within that timeframe.
             // However, that can result in stale data being returned during that time so
@@ -53,22 +50,6 @@ public class OkHttpConnector implements HttpConnector {
         }
 
         return urlConnection;
-    }
-
-    /** Returns TLSv1.2 only SSL Socket Factory. */
-    private SSLSocketFactory TlsSocketFactory() {
-        SSLContext sc;
-        try {
-            sc = SSLContext.getInstance("TLSv1.2");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-        try {
-            sc.init(null, null, null);
-            return sc.getSocketFactory();
-        } catch (KeyManagementException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 
     /** Returns connection spec with TLS v1.2 in it */

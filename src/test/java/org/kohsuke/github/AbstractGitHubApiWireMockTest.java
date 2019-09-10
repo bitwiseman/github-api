@@ -37,7 +37,7 @@ public abstract class AbstractGitHubApiWireMockTest extends Assert {
     public final static String STUBBED_USER_PASSWORD = "placeholder-password";
 
     protected GitHub gitHub;
-    private final String baseFilesClassPath = this.getClass().getName().replace('.', '/');
+    protected final String baseFilesClassPath = this.getClass().getName().replace('.', '/');
     protected final String baseRecordPath = "src/test/resources/" + baseFilesClassPath + "/wiremock";
 
 
@@ -136,6 +136,7 @@ public abstract class AbstractGitHubApiWireMockTest extends Assert {
         if (takeSnapshot) {
             githubApi.snapshotRecord(recordSpec()
                 .forTarget("https://api.github.com")
+                .captureHeader("If-None-Match")
                 .extractTextBodiesOver(255));
         }
     }

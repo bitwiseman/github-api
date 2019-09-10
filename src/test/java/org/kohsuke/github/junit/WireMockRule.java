@@ -51,6 +51,12 @@ public class WireMockRule implements MethodRule, TestRule, Container, Stubbing, 
     private boolean failOnUnmatchedRequests;
     private final Options options;
 
+    public String getMethodName() {
+        return methodName;
+    }
+
+    private String methodName = null;
+
     public WireMockRule(Options options) {
         this(options, true);
     }
@@ -83,6 +89,7 @@ public class WireMockRule implements MethodRule, TestRule, Container, Stubbing, 
     private Statement apply(final Statement base, final String methodName) {
         return new Statement() {
             public void evaluate() throws Throwable {
+                WireMockRule.this.methodName = methodName;
                 final Options localOptions = new WireMockOptions(
                     WireMockRule.this.options,
                     methodName);
@@ -101,6 +108,7 @@ public class WireMockRule implements MethodRule, TestRule, Container, Stubbing, 
                 } finally {
                     WireMockRule.this.after();
                     WireMockRule.this.stop();
+                    WireMockRule.this.methodName = null;
                 }
 
             }
