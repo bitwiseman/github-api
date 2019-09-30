@@ -156,6 +156,7 @@ public class GHMyself extends GHUser {
      * @param repoType type of repository returned in the listing
      */
     public PagedIterable<GHRepository> listRepositories(final int pageSize, final RepositoryListFilter repoType) {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHRepository>() {
             public PagedIterator<GHRepository> _iterator(int pageSize) {
                 return new PagedIterator<GHRepository>(root.retrieve().with("type",repoType).asIterator("/user/repos", GHRepository[].class, pageSize)) {

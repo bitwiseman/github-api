@@ -79,6 +79,7 @@ public abstract class GHPerson extends GHObject {
      * Unlike {@link #getRepositories()}, this does not wait until all the repositories are returned.
      */
     public PagedIterable<GHRepository> listRepositories(final int pageSize) {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHRepository>() {
             public PagedIterator<GHRepository> _iterator(int pageSize) {
                 return new PagedIterator<GHRepository>(root.retrieve().asIterator("/users/" + login + "/repos", GHRepository[].class, pageSize)) {

@@ -139,17 +139,7 @@ public class GHGist extends GHObject {
     }
 
     public PagedIterable<GHGist> listForks() {
-        return new PagedIterable<GHGist>() {
-            public PagedIterator<GHGist> _iterator(int pageSize) {
-                return new PagedIterator<GHGist>(root.retrieve().asIterator(getApiTailUrl("forks"), GHGist[].class, pageSize)) {
-                    @Override
-                    protected void wrapUp(GHGist[] page) {
-                        for (GHGist c : page)
-                            c.wrapUp(root);
-                    }
-                };
-            }
-        };
+        return PagedIterableFactory.create(GHGist[].class, root, getApiTailUrl("forks"), item -> item.wrapUp(root));
     }
 
     /**

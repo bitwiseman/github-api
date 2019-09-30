@@ -292,6 +292,7 @@ public class GHIssue extends GHObject implements Reactable{
      * Obtains all the comments associated with this issue.
      */
     public PagedIterable<GHIssueComment> listComments() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHIssueComment>() {
             public PagedIterator<GHIssueComment> _iterator(int pageSize) {
                 return new PagedIterator<GHIssueComment>(root.retrieve().asIterator(getIssuesApiRoute() + "/comments", GHIssueComment[].class, pageSize)) {
@@ -314,6 +315,7 @@ public class GHIssue extends GHObject implements Reactable{
 
     @Preview @Deprecated
     public PagedIterable<GHReaction> listReactions() {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHReaction>() {
             public PagedIterator<GHReaction> _iterator(int pageSize) {
                 return new PagedIterator<GHReaction>(owner.root.retrieve().withPreview(SQUIRREL_GIRL).asIterator(getApiRoute()+"/reactions", GHReaction[].class, pageSize)) {

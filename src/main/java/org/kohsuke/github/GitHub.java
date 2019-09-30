@@ -449,6 +449,7 @@ public class GitHub {
      * @see <a href="https://developer.github.com/v3/orgs/#parameters">List All Orgs - Parameters</a>
      */
     public PagedIterable<GHOrganization> listOrganizations(final String since) {
+        return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHOrganization>() {
             @Override
             public PagedIterator<GHOrganization> _iterator(int pageSize) {
@@ -489,6 +490,7 @@ public class GitHub {
      * @return a list of popular open source licenses
      */
     public PagedIterable<GHLicense> listLicenses() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHLicense>() {
             public PagedIterator<GHLicense> _iterator(int pageSize) {
                 return new PagedIterator<GHLicense>(retrieve().asIterator("/licenses", GHLicense[].class, pageSize)) {
@@ -506,6 +508,7 @@ public class GitHub {
      * Returns a list of all users.
      */
     public PagedIterable<GHUser> listUsers() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHUser>() {
             public PagedIterator<GHUser> _iterator(int pageSize) {
                 return new PagedIterator<GHUser>(retrieve().asIterator("/users", GHUser[].class, pageSize)) {
@@ -862,6 +865,7 @@ public class GitHub {
      * @see <a href="https://developer.github.com/v3/repos/#list-all-public-repositories">documentation</a>
      */
     public PagedIterable<GHRepository> listAllPublicRepositories(final String since) {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHRepository>() {
             public PagedIterator<GHRepository> _iterator(int pageSize) {
                 return new PagedIterator<GHRepository>(retrieve().with("since",since).asIterator("/repositories", GHRepository[].class, pageSize)) {

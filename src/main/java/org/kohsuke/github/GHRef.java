@@ -72,6 +72,7 @@ public class GHRef {
         return this;
     }
 
+
     /*package*/ static GHRef[] wrap(GHRef[] in, GitHub root) {
         for (GHRef r : in) {
             r.wrap(root);

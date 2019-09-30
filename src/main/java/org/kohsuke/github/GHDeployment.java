@@ -71,6 +71,8 @@ public class GHDeployment extends GHObject {
     }
 
     public PagedIterable<GHDeploymentStatus> listStatuses() {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHDeploymentStatus>() {
             public PagedIterator<GHDeploymentStatus> _iterator(int pageSize) {
                 return new PagedIterator<GHDeploymentStatus>(root.retrieve().asIterator(statuses_url, GHDeploymentStatus[].class, pageSize)) {

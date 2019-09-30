@@ -253,6 +253,7 @@ public class GHPullRequest extends GHIssue {
      * Retrieves all the files associated to this pull request.
      */
     public PagedIterable<GHPullRequestFileDetail> listFiles() {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHPullRequestFileDetail>() {
             public PagedIterator<GHPullRequestFileDetail> _iterator(int pageSize) {
                 return new PagedIterator<GHPullRequestFileDetail>(root.retrieve().asIterator(String.format("%s/files", getApiRoute()),
@@ -269,6 +270,7 @@ public class GHPullRequest extends GHIssue {
      * Retrieves all the reviews associated to this pull request.
      */
     public PagedIterable<GHPullRequestReview> listReviews() {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHPullRequestReview>() {
             public PagedIterator<GHPullRequestReview> _iterator(int pageSize) {
                 return new PagedIterator<GHPullRequestReview>(root.retrieve()
@@ -289,6 +291,7 @@ public class GHPullRequest extends GHIssue {
      * Obtains all the review comments associated with this pull request.
      */
     public PagedIterable<GHPullRequestReviewComment> listReviewComments() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHPullRequestReviewComment>() {
             public PagedIterator<GHPullRequestReviewComment> _iterator(int pageSize) {
                 return new PagedIterator<GHPullRequestReviewComment>(root.retrieve().asIterator(getApiRoute() + COMMENTS_ACTION,
@@ -306,6 +309,7 @@ public class GHPullRequest extends GHIssue {
      * Retrieves all the commits associated to this pull request.
      */
     public PagedIterable<GHPullRequestCommitDetail> listCommits() {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHPullRequestCommitDetail>() {
             public PagedIterator<GHPullRequestCommitDetail> _iterator(int pageSize) {
                 return new PagedIterator<GHPullRequestCommitDetail>(root.retrieve().asIterator(

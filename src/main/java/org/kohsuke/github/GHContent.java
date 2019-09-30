@@ -150,6 +150,7 @@ public class GHContent {
         if (!isDirectory())
             throw new IllegalStateException(path+" is not a directory");
 
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHContent>() {
             public PagedIterator<GHContent> _iterator(int pageSize) {
                 return new PagedIterator<GHContent>(root.retrieve().asIterator(url, GHContent[].class, pageSize)) {

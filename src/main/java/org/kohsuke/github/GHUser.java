@@ -81,6 +81,7 @@ public class GHUser extends GHPerson {
     }
 
     private PagedIterable<GHUser> listUser(final String suffix) {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHUser>() {
             public PagedIterator<GHUser> _iterator(int pageSize) {
                 return new PagedIterator<GHUser>(root.retrieve().asIterator(getApiTailUrl(suffix), GHUser[].class, pageSize)) {
@@ -109,6 +110,7 @@ public class GHUser extends GHPerson {
     }
 
     private PagedIterable<GHRepository> listRepositories(final String suffix) {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHRepository>() {
             public PagedIterator<GHRepository> _iterator(int pageSize) {
                 return new PagedIterator<GHRepository>(root.retrieve().asIterator(getApiTailUrl(suffix), GHRepository[].class, pageSize)) {
@@ -166,6 +168,7 @@ public class GHUser extends GHPerson {
      * Lists events performed by a user (this includes private events if the caller is authenticated.
      */
     public PagedIterable<GHEventInfo> listEvents() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHEventInfo>() {
             public PagedIterator<GHEventInfo> _iterator(int pageSize) {
                 return new PagedIterator<GHEventInfo>(root.retrieve().asIterator(String.format("/users/%s/events", login), GHEventInfo[].class, pageSize)) {
@@ -183,6 +186,7 @@ public class GHUser extends GHPerson {
      * Lists Gists created by this user.
      */
     public PagedIterable<GHGist> listGists() throws IOException {
+    return PagedIterableFactory.create(T[].class, root, tail, item -> item.wrapUp(root));
         return new PagedIterable<GHGist>() {
             public PagedIterator<GHGist> _iterator(int pageSize) {
                 return new PagedIterator<GHGist>(root.retrieve().asIterator(String.format("/users/%s/gists", login), GHGist[].class, pageSize)) {
