@@ -31,15 +31,10 @@ import com.infradna.tool.bridge_method_injector.WithBridgeMethods;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -548,12 +543,20 @@ public class GHRepository extends GHObject {
         return Collections.unmodifiableSet(new HashSet<GHTeam>(Arrays.asList(GHTeam.wrapUp(root.retrieve().to(getApiTailUrl("teams"), GHTeam[].class), root.getOrganization(getOwnerName())))));
     }
 
+
     public void addCollaborators(GHUser... users) throws IOException {
-        addCollaborators(asList(users));
+        addCollaborators(GHCollaboratorPermission.PUSH, asList(users));
+    }
+    public void addCollaborators(Collection<GHUser> users) throws IOException {
+        addCollaborators(GHCollaboratorPermission.PUSH, users);
     }
 
-    public void addCollaborators(Collection<GHUser> users) throws IOException {
-        modifyCollaborators(users, "PUT");
+    public void addCollaborators(GHCollaboratorPermission permission, GHUser... users) throws IOException {
+        addCollaborators(permission, asList(users));
+    }
+
+    public void addCollaborators(GHCollaboratorPermission permission, Collection<GHUser> users) throws IOException {
+        modifyCollaborators(users, "PUT", permission);
     }
 
     public void removeCollaborators(GHUser... users) throws IOException {
@@ -561,12 +564,20 @@ public class GHRepository extends GHObject {
     }
 
     public void removeCollaborators(Collection<GHUser> users) throws IOException {
-        modifyCollaborators(users, "DELETE");
+        modifyCollaborators(users, "DELETE", null);
     }
 
-    private void modifyCollaborators(Collection<GHUser> users, String method) throws IOException {
+    private void modifyCollaborators(Collection<GHUser> users, String method, GHCollaboratorPermission permission) throws IOException {
         for (GHUser user : users) {
-            new Requester(root).method(method).to(getApiTailUrl("collaborators/" + user.getLogin()));
+            if("DELETE".equals(method)) {
+                new Requester(root).method(method).to(getApiTailUrl("collaborators/" + user.getLogin()));
+            } else {
+                Requester r = new Requester(root).method(method);
+
+                r.with(new ByteArrayInputStream(permission.toString().getBytes(Charset.forName("UTF-8"))));
+                r.contentType("application/json;charset=UTF-8");
+                r.to(getApiTailUrl("collaborators/" + user.getLogin()));
+            }
         }
     }
 
