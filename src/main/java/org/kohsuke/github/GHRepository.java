@@ -153,6 +153,35 @@ public class GHRepository extends GHObject {
         boolean pull,push,admin;
     }
 
+    /**
+     * Enum with the possible collaborator permissions. Used in {@link #addCollaborators(GHCollaboratorPermission, GHUser...)}
+     * and {@link #addCollaborators(GHCollaboratorPermission, Collection<GHUser>)}.
+     *
+     * Request body of the resulting request is encoded within the toString method of this enum.
+     *
+     * @author Christoph Rieser
+     *
+     * @see #addCollaborators(GHCollaboratorPermission, GHUser...)
+     * @see #addCollaborators(GHCollaboratorPermission, Collection<GHUser>)
+     * @see <a href="https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator">https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator</a>
+     **/
+    public static enum GHCollaboratorPermission {
+        PULL("{ \"permission\": \"pull\" }"),
+        PUSH("{ \"permission\": \"push\" }"),
+        ADMIN("{ \"permission\": \"admin\" }");
+
+        final private String str;
+
+        private GHCollaboratorPermission(String str){
+            this.str = str;
+        }
+
+        @Override
+        public String toString(){
+            return str;
+        }
+    }
+
 
     public String getDescription() {
         return description;
@@ -543,26 +572,55 @@ public class GHRepository extends GHObject {
         return Collections.unmodifiableSet(new HashSet<GHTeam>(Arrays.asList(GHTeam.wrapUp(root.retrieve().to(getApiTailUrl("teams"), GHTeam[].class), root.getOrganization(getOwnerName())))));
     }
 
-
+    /**
+     * Adds GHUser(s) as collaborator(s) to this GHRepository with push permission.
+     *
+     * @param users user(s) to add
+     * @throws IOException
+     */
     public void addCollaborators(GHUser... users) throws IOException {
-        addCollaborators(GHCollaboratorPermission.PUSH, asList(users));
-    }
-    public void addCollaborators(Collection<GHUser> users) throws IOException {
-        addCollaborators(GHCollaboratorPermission.PUSH, users);
+        addCollaborators(asList(users));
     }
 
+    /**
+     * @see #addCollaborators(GHUser...)
+     */
+    public void addCollaborators(Collection<GHUser> users) throws IOException {
+        modifyCollaborators(users, "PUT", null);
+    }
+
+    /**
+     * Adds GHUser(s) as collaborator(s) to this GHRepository with the given permission.
+     * Only valid on organisation-owed repositories!
+     *
+     * @param permission permission the user(s) should get.
+     * @param users user(s) to add
+     * @throws IOException
+     * @see <a href="https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator">https://developer.github.com/v3/repos/collaborators/#add-user-as-a-collaborator</a>
+     */
     public void addCollaborators(GHCollaboratorPermission permission, GHUser... users) throws IOException {
         addCollaborators(permission, asList(users));
     }
 
+    /**
+     * @see #addCollaborators(GHCollaboratorPermission, GHUser...)
+     */
     public void addCollaborators(GHCollaboratorPermission permission, Collection<GHUser> users) throws IOException {
         modifyCollaborators(users, "PUT", permission);
     }
 
+    /**
+     * removes the given user(s) as collaborators from this repository
+     * @param users user(s) to remove
+     * @throws IOException
+     */
     public void removeCollaborators(GHUser... users) throws IOException {
         removeCollaborators(asList(users));
     }
 
+    /**
+     * @see #removeCollaborators(GHUser...) 
+     */
     public void removeCollaborators(Collection<GHUser> users) throws IOException {
         modifyCollaborators(users, "DELETE", null);
     }
@@ -573,9 +631,11 @@ public class GHRepository extends GHObject {
                 new Requester(root).method(method).to(getApiTailUrl("collaborators/" + user.getLogin()));
             } else {
                 Requester r = new Requester(root).method(method);
-
-                r.with(new ByteArrayInputStream(permission.toString().getBytes(Charset.forName("UTF-8"))));
-                r.contentType("application/json;charset=UTF-8");
+                //add request body if explicit permission is requested
+                if(permission != null) {
+                    r.with(new ByteArrayInputStream(permission.toString().getBytes(Charset.forName("UTF-8"))));
+                    r.contentType("application/json;charset=UTF-8");
+                }
                 r.to(getApiTailUrl("collaborators/" + user.getLogin()));
             }
         }
