@@ -1,0 +1,45 @@
+{
+  "id": "6e32fd77-3323-48d1-b2a3-46d5316dc947",
+  "name": "repos_chids_project-milestone-test_issues_1_events",
+  "request": {
+    "url": "/repos/chids/project-milestone-test/issues/1/events",
+    "method": "GET",
+    "headers": {
+      "Accept": {
+        "equalTo": "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "repos_chids_project-milestone-test_issues_1_events-4.json",
+    "headers": {
+      "Server": "GitHub.com",
+      "Date": "Thu, 16 Apr 2020 14:06:25 GMT",
+      "Content-Type": "application/json; charset=utf-8",
+      "Status": "200 OK",
+      "X-RateLimit-Limit": "5000",
+      "X-RateLimit-Remaining": "4990",
+      "X-RateLimit-Reset": "1587049581",
+      "Cache-Control": "private, max-age=60, s-maxage=60",
+      "Vary": [
+        "Accept, Authorization, Cookie, X-GitHub-OTP",
+        "Accept-Encoding, Accept, X-Requested-With"
+      ],
+      "ETag": "W/\"7b89d3bf793bc182c1246d05c707ef2c\"",
+      "X-OAuth-Scopes": "repo, user",
+      "X-Accepted-OAuth-Scopes": "repo",
+      "X-GitHub-Media-Type": "unknown, github.v3",
+      "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
+      "X-Frame-Options": "deny",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+      "Content-Security-Policy": "default-src 'none'",
+      "X-GitHub-Request-Id": "CED9:4980:C8B22:2436DD:5E986660"
+    }
+  },
+  "uuid": "6e32fd77-3323-48d1-b2a3-46d5316dc947",
+  "persistent": true,
+  "insertionIndex": 4
+}
