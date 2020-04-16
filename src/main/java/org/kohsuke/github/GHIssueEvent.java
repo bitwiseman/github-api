@@ -1,168 +1,229 @@
 package org.kohsuke.github;
 
 import java.util.Date;
+import java.util.function.Consumer;
 
 /**
  * The type GHIssueEvent.
  *
- * @see <a href="https://developer.github.com/v3/issues/events/">Github documentation for issue events</a>
- *
+ * @see <a href="https://developer.github.com/v3/issues/events/">Github documentation for issue
+ *     events</a>
  * @author Martin van Zijl
  */
-public class GHIssueEvent {
-    private GitHub root;
+public class GHIssueEvent implements Consumer<GHIssueEvent.GHIssueEventConsumer> {
+  private GitHub root;
 
-    private long id;
-    private String node_id;
-    private String url;
-    private GHUser actor;
-    private String event;
-    private String commit_id;
-    private String commit_url;
-    private String created_at;
-    private GHMilestone milestone;
-    private GHLabel label;
-    private GHUser assignee;
+  private long id;
+  private String node_id;
+  private String url;
+  private GHUser actor;
+  private String event;
+  private String commit_id;
+  private String commit_url;
+  private String created_at;
+  private GHMilestone milestone;
+  private GHLabel label;
+  private GHUser assignee;
 
-    private GHIssue issue;
+  private GHIssue issue;
 
-    /**
-     * Gets id.
-     *
-     * @return the id
-     */
-    public long getId() {
-        return id;
-    }
-
-    /**
-     * Gets node id.
-     *
-     * @return the node id
-     */
-    public String getNodeId() {
-        return node_id;
-    }
+  /**
+   * Interface for consuming event specific attributes.
+   */
+  public interface GHIssueEventConsumer {
+    String MILESTONED = "milestoned";
+    String DEMILESTONED = "demilestoned";
+    String LABELED = "labeled";
+    String UNLABELED = "unlabeled";
+    String ASSIGNED = "assigned";
+    String UNASSIGNED = "unassigned";
 
     /**
-     * Gets url.
+     * Invoked for "demilestoned" events.
      *
-     * @return the url
+     * @param {@link GHMilestone} that the issue was removed from
      */
-    public String getUrl() {
-        return url;
-    }
+    default void demilestoned(GHIssue issue, GHMilestone milestone) {}
 
     /**
-     * Gets actor.
+     * Invoked for "milestoned" events.
      *
-     * @return the actor
+     * @param {@link GHMilestone} that the issue was added to
      */
-    public GHUser getActor() {
-        return actor;
-    }
+    default void milestoned(GHIssue issue, GHMilestone milestone) {}
 
     /**
-     * Gets event.
+     * Invoked for "labeled" events.
      *
-     * @return the event
+     * @param {@link GHLabel} that was added to the issue
      */
-    public String getEvent() {
-        return event;
-    }
+    default void labeled(GHIssue issue, GHLabel label) {}
 
     /**
-     * Gets commit id.
+     * Invoked for "unlabeled" events.
      *
-     * @return the commit id
+     * @param {@link GHLabel} that was removed from the issue
      */
-    public String getCommitId() {
-        return commit_id;
-    }
+    default void unlabeled(GHIssue issue, GHLabel label) {}
+    /**
+     * Invoked for "unassigned" events.
+     *
+     * @param {@link GHUser} that was unassigned from the issue
+     */
+    default void unassigned(GHIssue issue, GHUser user) {}
 
     /**
-     * Gets commit url.
+     * Invoked for "assigned" events.
      *
-     * @return the commit url
+     * @param {@link GHUser} that was assigned to the issue
      */
-    public String getCommitUrl() {
-        return commit_url;
-    }
+    default void assigned(GHIssue issue, GHUser assignee) {}
 
     /**
-     * Gets created at.
+     * Dispatch the given {@link GHIssueEvent to the appropriate method.
      *
-     * @return the created at
+     * @param event
      */
-    public Date getCreatedAt() {
-        return GitHubClient.parseDate(created_at);
+    default void dispatch(final GHIssueEvent event) {
+      switch (event.getEvent()) {
+        case MILESTONED:
+          milestoned(event.issue, event.milestone);
+          break;
+        case DEMILESTONED:
+          demilestoned(event.issue, event.milestone);
+          break;
+        case LABELED:
+          labeled(event.issue, event.label);
+          break;
+        case UNLABELED:
+          unlabeled(event.issue, event.label);
+          break;
+        case ASSIGNED:
+          assigned(event.issue, event.assignee);
+          break;
+        case UNASSIGNED:
+          unassigned(event.issue, event.assignee);
+          break;
+        default:
+          // Not supported
+      }
     }
+  }
 
-    /**
-     * Gets root.
-     *
-     * @return the root
-     */
-    public GitHub getRoot() {
-        return root;
-    }
+  /**
+   * Apply {@link GHIssueEventConsumer} to this {@link GHIssueEvent}.
+   *
+   * @param consumer
+   */
+  public void accept(final GHIssueEventConsumer consumer) {
+    consumer.dispatch(this);
+  }
 
-    /**
-     * Gets issue.
-     *
-     * @return the issue
-     */
-    public GHIssue getIssue() {
-        return issue;
-    }
+  /**
+   * Gets id.
+   *
+   * @return the id
+   */
+  public long getId() {
+    return id;
+  }
 
-    /**
-     * Get the {@link GHMilestone} that this issue was added to or removed from. Only present for events "milestoned"
-     * and "demilestoned", <code>null</code> otherwise.
-     *
-     * @return the milestone
-     */
-    public GHMilestone getMilestone() {
-        return milestone;
-    }
+  /**
+   * Gets node id.
+   *
+   * @return the node id
+   */
+  public String getNodeId() {
+    return node_id;
+  }
 
-    /**
-     * Get the {@link GHLabel} that was added to or removed from the issue. Only present for events "labeled" and
-     * "unlabeled", <code>null</code> otherwise.
-     *
-     * @return the label
-     */
-    public GHLabel getLabel() {
-        return label;
-    }
+  /**
+   * Gets url.
+   *
+   * @return the url
+   */
+  public String getUrl() {
+    return url;
+  }
 
-    /**
-     * Get the {@link GHUser} that was assigned or unassigned from the issue. Only present for events "assigned" and
-     * "unassigned", <code>null</code> otherwise.
-     *
-     * @return the user
-     */
-    public GHUser getAssignee() {
-        return assignee;
-    }
+  /**
+   * Gets actor.
+   *
+   * @return the actor
+   */
+  public GHUser getActor() {
+    return actor;
+  }
 
-    GHIssueEvent wrapUp(GitHub root) {
-        this.root = root;
-        return this;
-    }
+  /**
+   * Gets event.
+   *
+   * @return the event
+   */
+  public String getEvent() {
+    return event;
+  }
 
-    GHIssueEvent wrapUp(GHIssue parent) {
-        this.issue = parent;
-        this.root = parent.root;
-        return this;
-    }
+  /**
+   * Gets commit id.
+   *
+   * @return the commit id
+   */
+  public String getCommitId() {
+    return commit_id;
+  }
 
-    @Override
-    public String toString() {
-        return String.format("Issue %d was %s by %s on %s",
-                getIssue().getNumber(),
-                getEvent(),
-                getActor().getLogin(),
-                getCreatedAt().toString());
-    }
+  /**
+   * Gets commit url.
+   *
+   * @return the commit url
+   */
+  public String getCommitUrl() {
+    return commit_url;
+  }
+
+  /**
+   * Gets created at.
+   *
+   * @return the created at
+   */
+  public Date getCreatedAt() {
+    return GitHubClient.parseDate(created_at);
+  }
+
+  /**
+   * Gets root.
+   *
+   * @return the root
+   */
+  public GitHub getRoot() {
+    return root;
+  }
+
+  /**
+   * Gets issue.
+   *
+   * @return the issue
+   */
+  public GHIssue getIssue() {
+    return issue;
+  }
+
+  GHIssueEvent wrapUp(GitHub root) {
+    this.root = root;
+    return this;
+  }
+
+  GHIssueEvent wrapUp(GHIssue parent) {
+    this.issue = parent;
+    this.root = parent.root;
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "Issue %d was %s by %s on %s",
+        getIssue().getNumber(), getEvent(), getActor().getLogin(), getCreatedAt().toString());
+  }
 }
