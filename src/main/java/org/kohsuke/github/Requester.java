@@ -113,7 +113,11 @@ class Requester extends GitHubRequest.Builder<Requester> {
     public InputStream fetchStream() throws IOException {
         return client
                 .sendRequest(this,
-                        (responseInfo) -> new ByteArrayInputStream(IOUtils.toByteArray(responseInfo.bodyStream())))
+                        (responseInfo) -> {
+                            try (InputStream body = responseInfo.bodyStream()) {
+                                return new ByteArrayInputStream(IOUtils.toByteArray(body));
+                            }
+                        })
                 .body();
     }
 

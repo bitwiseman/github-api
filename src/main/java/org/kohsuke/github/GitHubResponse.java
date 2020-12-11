@@ -192,6 +192,29 @@ class GitHubResponse<T> {
     }
 
     /**
+     * Represents a consumer of items, which can throw.
+     *
+     * <p>
+     * This is a <a href="package-summary.html">functional interface</a> whose functional method is
+     * {@link #accept(T)}.
+     *
+     * @param <T>
+     *            the type of results supplied by this supplier
+     */
+    @FunctionalInterface
+    interface ConsumerThrows<T, E extends Throwable>  {
+
+        /**
+         * Gets a result.
+         *
+         * @param input the value to consume
+         * @throws E
+         *             if an I/O Exception occurs.
+         */
+        void accept(T input) throws E;
+    }
+
+    /**
      * Represents a supplier of results that can throw.
      *
      * <p>
@@ -261,11 +284,28 @@ class GitHubResponse<T> {
         /**
          * The response body as an {@link InputStream}.
          *
+         * Response body must be closed and may be consumed only once.
+         *
          * @return the response body
          * @throws IOException
          *             if an I/O Exception occurs.
          */
-        abstract InputStream bodyStream() throws IOException;
+        protected abstract InputStream bodyStream() throws IOException;
+
+//        /**
+//         * The response body as an {@link InputStream}.
+//         *
+//         * Response body must be closed and may be consumed only once.
+//         *
+//         * @return the response body
+//         * @throws IOException
+//         *             if an I/O Exception occurs.
+//         */
+//        void readBodyStream(ConsumerThrows<InputStream, IOException> consumerThrows) throws IOException {
+//            try (InputStream stream = bodyStream()) {
+//                consumerThrows.accept(stream);
+//            }
+//        }
 
         /**
          * The error message for this response.
@@ -322,9 +362,9 @@ class GitHubResponse<T> {
          */
         @Nonnull
         String getBodyAsString() throws IOException {
-            InputStreamReader r = null;
-            r = new InputStreamReader(this.bodyStream(), StandardCharsets.UTF_8);
-            return IOUtils.toString(r);
+            try (InputStreamReader r = new InputStreamReader(this.bodyStream(), StandardCharsets.UTF_8)) {
+                return IOUtils.toString(r);
+            }
         }
     }
 

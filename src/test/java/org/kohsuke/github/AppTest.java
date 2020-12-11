@@ -2,6 +2,8 @@ package org.kohsuke.github;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.squareup.okhttp.OkUrlFactory;
+import com.squareup.okhttp.OkHttpClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assume;
@@ -9,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.kohsuke.github.GHCommit.File;
 import org.kohsuke.github.GHOrganization.Permission;
+import org.kohsuke.github.extras.OkHttpConnector;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -437,6 +440,13 @@ public class AppTest extends AbstractGitHubWireMockTest {
 
     @Test
     public void testCommit() throws Exception {
+        OkHttpClient client = new OkHttpClient();
+        OkHttpConnector connector = new OkHttpConnector(new OkUrlFactory(client));
+
+        this.gitHub = getGitHubBuilder().withEndpoint(mockGitHub.apiServer().baseUrl())
+            .withConnector(connector)
+            .build();
+
         GHCommit commit = gitHub.getUser("jenkinsci")
                 .getRepository("jenkins")
                 .getCommit("08c1c9970af4d609ae754fbe803e06186e3206f7");

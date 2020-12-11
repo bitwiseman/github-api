@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import static java.util.logging.Level.*;
@@ -64,8 +65,8 @@ class GitHubHttpUrlConnectionClient extends GitHubClient {
             throw new GHIOException(e.getMessage(), e);
         }
 
-        // HttpUrlConnection is nuts. This call opens the connection and gets a response.
-        // Putting this on it's own line for ease of debugging if needed.
+        connection.connect();
+
         int statusCode = connection.getResponseCode();
         Map<String, List<String>> headers = connection.getHeaderFields();
 
@@ -98,6 +99,9 @@ class GitHubHttpUrlConnectionClient extends GitHubClient {
 
         @Nonnull
         private final HttpURLConnection connection;
+
+        @CheckForNull
+        private InputStream body = null;
 
         HttpURLConnectionResponseInfo(@Nonnull GitHubRequest request,
                 int statusCode,
@@ -193,8 +197,11 @@ class GitHubHttpUrlConnectionClient extends GitHubClient {
         /**
          * {@inheritDoc}
          */
-        InputStream bodyStream() throws IOException {
-            return wrapStream(connection.getInputStream());
+        protected InputStream bodyStream() throws IOException {
+            if (body == null) {
+                body = wrapStream(connection.getInputStream());
+            }
+            return body;
         }
 
         /**
@@ -237,7 +244,7 @@ class GitHubHttpUrlConnectionClient extends GitHubClient {
 
         @Override
         public void close() throws IOException {
-            IOUtils.closeQuietly(connection.getInputStream());
+            IOUtils.closeQuietly(bodyStream());
         }
     }
 

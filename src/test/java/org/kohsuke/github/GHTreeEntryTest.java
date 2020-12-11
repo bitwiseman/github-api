@@ -6,12 +6,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-
-public class GHTreeBuilderTest extends AbstractGitHubWireMockTest {
+public class GHTreeEntryTest extends AbstractGitHubWireMockTest {
     private static String REPO_NAME = "hub4j-test-org/GHTreeBuilderTest";
 
     private static String PATH_SCRIPT = "app/run.sh";
@@ -88,28 +85,22 @@ public class GHTreeBuilderTest extends AbstractGitHubWireMockTest {
         treeBuilder.add(PATH_DATA1, CONTENT_DATA1, false);
         treeBuilder.add(PATH_DATA2, CONTENT_DATA2, false);
 
-        GHCommit commit = updateTree();
+        updateTree();
 
         assertEquals(CONTENT_SCRIPT.length(), getFileSize(PATH_SCRIPT));
         assertEquals(CONTENT_README.length(), getFileSize(PATH_README));
         assertEquals(CONTENT_DATA1.length, getFileSize(PATH_DATA1));
         assertEquals(CONTENT_DATA2.length, getFileSize(PATH_DATA2));
-
-//        commit.getTree().getEntry(PATH_SCRIPT).readAsBlob()
-//
-//        repo.gettr
-
-
     }
 
-    private GHCommit updateTree() throws IOException {
+    private void updateTree() throws IOException {
         String treeSha = treeBuilder.create().getSha();
-        GHCommit commit = new GHCommitBuilder(repo).message("Add files")
+        String commitSha = new GHCommitBuilder(repo).message("Add files")
                 .tree(treeSha)
                 .parent(masterRef.getObject().getSha())
-                .create();
-        masterRef.updateTo(commit.getSHA1());
-        return commit;
+                .create()
+                .getSHA1();
+        masterRef.updateTo(commitSha);
     }
 
     private long getFileSize(String path) throws IOException {
