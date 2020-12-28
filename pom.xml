@@ -355,7 +355,39 @@
           </execution>
         </executions>
         <configuration>
+          <ratchetFrom>origin/master</ratchetFrom>
           <java>
+            <includes>
+              <include>src/test/java/org/kohsuke/github/GHOrganizationTest.java</include>
+              <include>src/main/java/org/kohsuke/github/GHDirection.java</include>
+              <include>src/main/java/org/kohsuke/github/GHPullRequestQueryBuilder.java</include>
+              <include>src/main/java/org/kohsuke/github/GHQueryBuilder.java</include>
+              <include>src/test/java/org/kohsuke/github/UserTest.java</include>
+              <include>src/main/java/org/kohsuke/github/extras/ImpatientHttpConnector.java</include>
+              <include>src/main/java/org/kohsuke/github/GHApiInfo.java</include>
+              <include>src/main/java/org/kohsuke/github/GHHooks.java</include>
+              <include>src/main/java/org/kohsuke/github/GHOrgHook.java</include>
+              <include>src/main/java/org/kohsuke/github/GHRepoHook.java</include>
+              <include>src/main/java/org/kohsuke/github/GHPullRequestFileDetail.java</include>
+              <include>src/main/java/org/kohsuke/github/GHPullRequestReviewComment.java</include>
+              <include>src/main/java/org/kohsuke/github/GHNotificationStream.java</include>
+              <include>src/main/java/org/kohsuke/github/GHThread.java</include>
+              <include>src/main/java/org/kohsuke/github/GHContentSearchBuilder.java</include>
+              <include>src/main/java/org/kohsuke/github/GHRepositorySearchBuilder.java</include>
+              <include>src/main/java/org/kohsuke/github/GHUserSearchBuilder.java</include>
+              <include>src/main/java/org/kohsuke/github/GHSearchBuilder.java</include>
+              <include>src/main/java/org/kohsuke/github/MarkdownMode.java</include>
+              <include>src/main/java/org/kohsuke/github/RateLimitHandler.java</include>
+              <include>src/main/java/org/kohsuke/github/GHTreeEntry.java</include>
+              <include>src/main/java/org/kohsuke/github/GHTree.java</include>
+              <include>src/test/java/org/kohsuke/github/CommitTest.java</include>
+              <include>src/main/java/org/kohsuke/github/GHSubscription.java</include>
+              <include>src/test/java/org/kohsuke/github/RepositoryTest.java</include>
+              <include>src/main/java/org/kohsuke/github/GHLabel.java</include>
+              <include>src/main/java/org/kohsuke/github/PagedSearchIterable.java</include>
+              <include>src/main/java/org/kohsuke/github/SearchResult.java</include>
+              <include>src/main/java/org/kohsuke/github/GHIssueSearchBuilder.java</include>
+            </includes>
             <eclipse>
               <file>${basedir}/src/build/eclipse/formatter.xml</file>
             </eclipse>
@@ -368,7 +400,17 @@
             <trimTrailingWhitespace />
             <endWithNewline />
 
+            <licenseHeader>
+              <file>${basedir}/src/build/license-header.txt</file>
+            </licenseHeader>
           </java>
+<!--          <java>-->
+<!--            <excludes>-->
+<!--              <exclude>src/main/java/org/kohsuke/github/extras/okhttp3/ObsoleteUrlFactory.java</exclude>-->
+<!--            </excludes>-->
+
+<!--          </java>-->
+
         </configuration>
       </plugin>
       <plugin>
