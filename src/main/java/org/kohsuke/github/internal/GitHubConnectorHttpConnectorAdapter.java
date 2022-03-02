@@ -10,14 +10,13 @@ import org.kohsuke.github.connector.GitHubConnectorResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.net.*;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.net.ssl.SSLHandshakeException;
 
 /**
  * Adapts an HttpConnector to be usable as GitHubConnector.
@@ -82,12 +81,17 @@ public final class GitHubConnectorHttpConnectorAdapter implements GitHubConnecto
             throw new GHIOException(e.getMessage(), e);
         }
 
-        // HttpUrlConnection is nuts. This call opens the connection and gets a response.
-        // Putting this on it's own line for ease of debugging if needed.
-        int statusCode = connection.getResponseCode();
-        Map<String, List<String>> headers = connection.getHeaderFields();
+        try {
+            // HttpUrlConnection is nuts. This call opens the connection and gets a response.
+            // Putting this on it's own line for ease of debugging if needed.
+            int statusCode = connection.getResponseCode();
+            Map<String, List<String>> headers = connection.getHeaderFields();
 
-        return new HttpURLConnectionGitHubConnectorResponse(request, statusCode, headers, connection);
+            return new HttpURLConnectionGitHubConnectorResponse(request, statusCode, headers, connection);
+        } catch (SocketException | SocketTimeoutException | SSLHandshakeException e) {
+            // These transient errors thrown by HttpURLConnection
+            throw (RetryRequestException)new RetryRequestException().initCause(e);
+        }
     }
 
     @Nonnull

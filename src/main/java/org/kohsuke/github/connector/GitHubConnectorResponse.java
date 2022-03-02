@@ -176,6 +176,11 @@ public abstract class GitHubConnectorResponse implements Closeable {
         @Override
         @Nonnull
         public InputStream bodyStream() throws IOException {
+            prepareInputBytes();
+            return new ByteArrayInputStream(inputBytes);
+        }
+
+        protected final void prepareInputBytes() throws IOException {
             if (isClosed) {
                 throw new IOException("Response is closed");
             }
@@ -194,8 +199,6 @@ public abstract class GitHubConnectorResponse implements Closeable {
             if (inputBytes == null) {
                 throw new IOException("Response body missing, stream null");
             }
-
-            return new ByteArrayInputStream(inputBytes);
         }
 
         /**

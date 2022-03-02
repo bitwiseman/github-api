@@ -9,6 +9,7 @@ import org.kohsuke.github.connector.GitHubConnector;
 import org.kohsuke.github.connector.GitHubConnectorRequest;
 import org.kohsuke.github.connector.GitHubConnectorResponse;
 import org.kohsuke.github.function.FunctionThrows;
+import org.kohsuke.github.internal.RetryRequestException;
 
 import java.io.*;
 import java.net.*;
@@ -21,7 +22,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import javax.net.ssl.SSLHandshakeException;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
@@ -387,16 +387,18 @@ class GitHubClient {
                 return createResponse(connectorResponse, handler);
             } catch (RetryRequestException e) {
                 // retry requested by requested by error handler (rate limit handler for example)
-                if (retries > 0 && e.connectorRequest != null) {
-                    connectorRequest = e.connectorRequest;
-                }
-            } catch (SocketException | SocketTimeoutException | SSLHandshakeException e) {
-                // These transient errors thrown by HttpURLConnection
                 if (retries > 0) {
-                    logRetryConnectionError(e, request.url(), retries);
+                    if (e.connectorRequest() != null) {
+                        connectorRequest = e.connectorRequest();
+                    }
+                    if (e.getCause() instanceof IOException) {
+                        logRetryConnectionError(e, request.url(), retries);
+                    }
                     continue;
                 }
-                throw interpretApiError(e, connectorRequest, connectorResponse);
+                if (e.getCause() instanceof IOException) {
+                    throw interpretApiError((IOException)e.getCause(), connectorRequest, connectorResponse);
+                }
             } catch (IOException e) {
                 throw interpretApiError(e, connectorRequest, connectorResponse);
             } finally {
@@ -762,17 +764,6 @@ class GitHubClient {
 
     static <T> List<T> unmodifiableListOrNull(List<? extends T> list) {
         return list == null ? null : Collections.unmodifiableList(list);
-    }
-
-    static class RetryRequestException extends IOException {
-        final GitHubConnectorRequest connectorRequest;
-        RetryRequestException() {
-            this(null);
-        }
-
-        RetryRequestException(GitHubConnectorRequest connectorRequest) {
-            this.connectorRequest = connectorRequest;
-        }
     }
 
     /**
